@@ -1,12 +1,11 @@
-package dev.enche.application.web;
+package dev.enche.web;
 
-import dev.enche.application.web.utils.Utils;
+import dev.enche.web.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class HttpRequest {
     final private Map<String, String> requestLine;

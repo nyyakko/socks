@@ -1,4 +1,4 @@
-package dev.enche.application.web.utils;
+package dev.enche.web.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

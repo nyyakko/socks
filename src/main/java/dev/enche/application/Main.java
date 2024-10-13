@@ -5,8 +5,8 @@ import dev.enche.application.controllers.StudentController;
 import dev.enche.application.dto.StudentDTO;
 import dev.enche.application.entities.School;
 import dev.enche.application.entities.Student;
-import dev.enche.application.web.HttpRouter;
-import dev.enche.application.web.enums.HttpMethod;
+import dev.enche.web.HttpRouter;
+import dev.enche.web.enums.HttpMethod;
 
 public class Main {
 

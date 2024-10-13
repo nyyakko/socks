@@ -4,7 +4,7 @@ import dev.enche.application.dto.StudentDTO;
 import dev.enche.application.entities.School;
 import dev.enche.application.entities.Student;
 import dev.enche.application.repositories.SchoolRepository;
-import dev.enche.application.web.HttpRequest;
+import dev.enche.web.HttpRequest;
 
 import java.util.List;
 import java.util.UUID;

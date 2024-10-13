@@ -1,10 +1,10 @@
-package dev.enche.application.web;
+package dev.enche.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.enche.application.utils.Utils;
-import dev.enche.application.web.enums.HttpMethod;
+import dev.enche.web.enums.HttpMethod;
 
 import java.io.BufferedReader;
 import java.io.IOException;
