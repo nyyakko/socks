@@ -3,6 +3,7 @@ package dev.enche.web.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.enche.web.core.HttpQueryParam;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -19,7 +20,8 @@ public class Utils {
         final var matcher = Pattern.compile(regex).matcher(reader.readLine());
         if (matcher.find()) {
             result.put("Method", matcher.group(1));
-            result.put("Path", matcher.group(2));
+            result.put("Uri", matcher.group(2));
+            result.put("Path", matcher.group(2).split("\\?")[0]);
             result.put("Version", matcher.group(3));
         }
         return result;
@@ -47,11 +49,35 @@ public class Utils {
         return pathParams;
     }
 
+    public static Map<String, HttpQueryParam> parseQueryParams(String uri) {
+        Map<String, HttpQueryParam> queryParams = new HashMap<>();
+        final var pattern = Pattern.compile("([\\w,]+)([~!=]?=)([^&]*)");
+        final var matcher = pattern.matcher(uri);
+        while (matcher.find()) {
+            for (var param : matcher.group(1).split(","))
+                queryParams.put(param, new HttpQueryParam(param, matcher.group(2), matcher.group(3)));
+        }
+        return queryParams;
+    }
+
     public static String objectAsJson(Object object) throws JsonProcessingException {
         return new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(object);
     }
 
     public static String objectAsPrettyJson(Object object) throws JsonProcessingException {
         return new JSONObject(objectAsJson(object)).toString(4);
+    }
+
+
+    public static int UTF8StringLength(CharSequence sequence) {
+        int count = 0;
+        for (int i = 0, len = sequence.length(); i < len; i++) {
+            char ch = sequence.charAt(i);
+            if (ch <= 0x7F) { count++; }
+            else if (ch <= 0x7FF) { count += 2; }
+            else if (Character.isHighSurrogate(ch)) { count += 4; ++i; }
+            else { count += 3; }
+        }
+        return count;
     }
 }

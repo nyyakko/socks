@@ -7,13 +7,11 @@ import dev.enche.web.core.HttpRequest;
 import dev.enche.web.core.enums.HttpMethod;
 import dev.enche.web.utils.Utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -82,7 +80,7 @@ public class HttpRouter {
                 .map(key -> key.split(request.getMethod())[1].strip())
                 .filter(key -> {
                     final var pattern = key.split("/");
-                    final var uri = request.getUri().split("/");
+                    final var uri = request.getPath().split("/");
                     if (pattern.length != uri.length) return false;
                     for (var index = 0; index != uri.length; index += 1) {
                         final var isSame = pattern[index].equals(uri[index]);
@@ -100,6 +98,7 @@ public class HttpRouter {
     private void handleHttpPost(HttpRequest request, PrintWriter writer, BufferedReader reader) {
         final var header = new StringBuilder();
         header.append("HTTP/1.1 200 OK\n");
+        header.append("Accept-Encoding: UTF-8\n");
         header.append("Content-Length: 0\n");
         header.append("Access-Control-Allow-Origin: *\n");
         header.append("\n");
@@ -111,7 +110,7 @@ public class HttpRouter {
                 final var router = routers.get(routerKey);
                 final var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
                 if (routerKey.contains("{") && routerKey.contains("}")) {
-                    request.setPathParams(Utils.parsePathParams(request.getUri().split("/"), router.uri().split("/")));
+                    request.setPathParams(Utils.parsePathParams(request.getPath().split("/"), router.uri().split("/")));
                 }
                 try {
                     request.setBody(mapper.readValue(reader.readLine(), router.type()));
@@ -129,6 +128,7 @@ public class HttpRouter {
     private void handleHttpGet(HttpRequest request, PrintWriter writer) {
         final var header = new StringBuilder();
         header.append("HTTP/1.1 200 OK\n");
+        header.append("Accept-Encoding: UTF-8\n");
         header.append("Access-Control-Allow-Origin: *\n");
         header.append("Content-Type: application/json\n");
 
@@ -136,13 +136,13 @@ public class HttpRouter {
             .map(routerKey -> {
                 final var router = routers.get(routerKey);
                 if (routerKey.contains("{") && routerKey.contains("}")) {
-                    request.setPathParams(Utils.parsePathParams(request.getUri().split("/"), router.uri().split("/")));
+                    request.setPathParams(Utils.parsePathParams(request.getPath().split("/"), router.uri().split("/")));
                 }
                 try {
                     final var result = router.handler().apply(request);
                     if (result != null) {
                         final var response = Utils.objectAsJson(result);
-                        header.append("Content-Length: ").append(response.length()).append("\n");
+                        header.append("Content-Length: ").append(Utils.UTF8StringLength(response)).append("\n");
                         header.append("\n");
                         header.append(response);
                     } else {
@@ -165,6 +165,7 @@ public class HttpRouter {
         final var header = new StringBuilder();
         header.append("HTTP/1.1 200 OK\n");
         header.append("Content-Length: 0\n");
+        header.append("Accept-Encoding: UTF-8\n");
         header.append("Access-Control-Allow-Origin: *\n");
         header.append("\n");
 
@@ -172,7 +173,7 @@ public class HttpRouter {
             .map(routerKey -> {
                 final var router = routers.get(routerKey);
                 if (routerKey.contains("{") && routerKey.contains("}")) {
-                    request.setPathParams(Utils.parsePathParams(request.getUri().split("/"), router.uri().split("/")));
+                    request.setPathParams(Utils.parsePathParams(request.getPath().split("/"), router.uri().split("/")));
                 }
                 router.handler().apply(request);
                 return routerKey;
@@ -188,6 +189,7 @@ public class HttpRouter {
         final var header = new StringBuilder();
         header.append("HTTP/1.1 500 Internal Server Error\n");
         header.append("Access-Control-Allow-Origin: *\n");
+        header.append("Accept-Encoding: UTF-8\n");
         final var traceElements = exception.getStackTrace();
         final var response =
             "<!DOCTYPE html>\n" +
@@ -230,12 +232,13 @@ public class HttpRouter {
     }
 
     private void route(Socket client) {
-        try (final var writer = new PrintWriter(client.getOutputStream(), true);
+        try (final var writer = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8), true);
              final var reader = new BufferedReader(new InputStreamReader(client.getInputStream()))
         ) {
             final var request = new HttpRequest();
             request.setRequestLine(Utils.parseRequestLine(reader));
             request.setHeaders(Utils.parseRequestHeaders(reader));
+            request.setQueryParams(Utils.parseQueryParams(request.getUri()));
 
             try {
                 switch (request.getMethod()) {

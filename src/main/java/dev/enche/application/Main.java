@@ -25,6 +25,7 @@ public class Main {
         router.registerRouter(SchoolController.class, "/v1/schools/{schoolId}/students", HttpMethod.GET, SchoolController::listStudents);
         router.registerRouter(SchoolController.class, "/v1/schools/{schoolId}/students/{studentId}", HttpMethod.GET, SchoolController::findStudent);
         router.registerRouter(SchoolController.class, "/v1/schools/{schoolId}/students", HttpMethod.POST, StudentDTO.class, SchoolController::saveStudent);
+        router.registerRouter(SchoolController.class, "/v1/schools/{schoolId}/students/{studentId}", HttpMethod.DELETE, SchoolController::deleteStudent);
 
         router.routeAll();
     }

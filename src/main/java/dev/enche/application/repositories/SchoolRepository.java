@@ -5,8 +5,11 @@ import dev.enche.application.entities.Student;
 import dev.enche.application.entities.relations.StudentToSchool;
 import dev.enche.application.persistence.SchoolPersistence;
 import dev.enche.application.persistence.relations.StudentToSchoolPersistence;
+import dev.enche.persistence.core.Query;
+import dev.enche.web.core.HttpQueryParam;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,8 +18,27 @@ public class SchoolRepository {
     private static final SchoolPersistence persistence = new SchoolPersistence();
     private static final StudentToSchoolPersistence studentSchoolPersistence = new StudentToSchoolPersistence();
 
-    public List<School> list() {
-        return persistence.selectAny().getAll();
+    private Query<School> handleQueryParams(Query<School> query, Map<String, HttpQueryParam> queryParams) {
+        var result = query;
+
+        if (queryParams.containsKey("name")) {
+            final var param = queryParams.get("name");
+            result = result.is(name -> name.toUpperCase().contains(param.getValue().toUpperCase()), School::getName);
+        }
+
+        return result;
+    }
+
+    public List<School> list(Map<String, HttpQueryParam> queryParams) {
+        return
+            persistence
+                .select(ctx -> ctx
+                    .where(query ->
+                        handleQueryParams(query, queryParams)
+                    )
+                )
+                .getAll()
+            ;
     }
 
     public Optional<School> find(UUID id) {

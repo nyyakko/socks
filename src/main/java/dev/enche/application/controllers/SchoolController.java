@@ -14,7 +14,7 @@ public class SchoolController {
     private final SchoolRepository repository = new SchoolRepository();
 
     public List<School> list(HttpRequest request) {
-        return repository.list();
+        return repository.list(request.getQueryParams());
     }
 
     public School find(HttpRequest request) {

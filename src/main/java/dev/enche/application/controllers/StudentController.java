@@ -12,7 +12,7 @@ public class StudentController {
     private final StudentRepository repository = new StudentRepository();
 
     public List<Student> list(HttpRequest request) {
-        return repository.list();
+        return repository.list(request.getQueryParams());
     }
 
     public Student find(HttpRequest request) {
