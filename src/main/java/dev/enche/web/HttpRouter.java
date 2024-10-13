@@ -87,7 +87,7 @@ public class HttpRouter {
                     for (var index = 0; index != uri.length; index += 1) {
                         final var isSame = pattern[index].equals(uri[index]);
                         final var isWildcard = pattern[index].startsWith("{") && pattern[index].endsWith("}");
-                        if (!isSame && !(isWildcard)) {
+                        if (!(isSame || isWildcard)) {
                             return false;
                         }
                     }
@@ -233,7 +233,9 @@ public class HttpRouter {
         try (final var writer = new PrintWriter(client.getOutputStream(), true);
              final var reader = new BufferedReader(new InputStreamReader(client.getInputStream()))
         ) {
-            final var request = new HttpRequest(reader);
+            final var request = new HttpRequest();
+            request.setRequestLine(Utils.parseRequestLine(reader));
+            request.setHeaders(Utils.parseRequestHeaders(reader));
 
             try {
                 switch (request.getMethod()) {

@@ -1,23 +1,16 @@
 package dev.enche.web.core;
 
-import dev.enche.web.utils.Utils;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
-    final private Map<String, String> requestLine;
+    private Map<String, String> requestLine;
     private Map<String, String> headers;
-    private Map<String, String> pathParams = new HashMap<>();
-    private Map<String, String> queryParams = new HashMap<>();
+    private Map<String, String> pathParams;
+    private Map<String, String> queryParams;
     private Object body;
 
-    public HttpRequest(BufferedReader reader) throws IOException {
-        this.requestLine = Utils.parseRequestLine(reader);
-        this.headers = Utils.parseRequestHeaders(reader);
-    }
+    public Map<String, String> getRequestLine() { return requestLine; }
+    public void setRequestLine(Map<String, String> requestLine) { this.requestLine = requestLine; }
 
     public String getMethod() { return requestLine.get("Method"); }
     public void setMethod(String method) { this.requestLine.put("Method", method); }
