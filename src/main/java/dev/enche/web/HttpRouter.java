@@ -142,7 +142,7 @@ public class HttpRouter {
                     final var result = router.handler().apply(request);
                     if (result != null) {
                         final var response = Utils.objectAsJson(result);
-                        header.append("Content-Length: ").append(Utils.UTF8StringLength(response)).append("\n");
+                        header.append("Content-Length: ").append(response.getBytes().length).append("\n");
                         header.append("\n");
                         header.append(response);
                     } else {
