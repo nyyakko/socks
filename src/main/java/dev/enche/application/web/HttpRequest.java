@@ -1,5 +1,7 @@
 package dev.enche.application.web;
 
+import dev.enche.application.web.utils.Utils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -7,51 +9,25 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class HttpRequest {
-
-    String method = "";
-    String uri = "";
-    String version = "";
-    Map<String, String> headers = new HashMap<>();
-    Map<String, String> pathParams = new HashMap<>();
-    Map<String, String> queryParams = new HashMap<>();
-    Object body;
+    final private Map<String, String> requestLine;
+    private Map<String, String> headers;
+    private Map<String, String> pathParams = new HashMap<>();
+    private Map<String, String> queryParams = new HashMap<>();
+    private Object body;
 
     public HttpRequest(BufferedReader reader) throws IOException {
-        processRequestLine(reader);
-        processRequestHeaders(reader);
+        this.requestLine = Utils.parseRequestLine(reader);
+        this.headers = Utils.parseRequestHeaders(reader);
     }
 
-    private void processRequestLine(BufferedReader reader) throws IOException {
-        final var regex = "^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|TRACE|CONNECT) (\\S+) (\\S+)";
-        final var pattern = Pattern.compile(regex);
-        final var line = reader.readLine();
-        final var matcher = pattern.matcher(line);
-        if (matcher.find()) {
-            this.method = matcher.group(1);
-            this.uri = matcher.group(2);
-            this.version = matcher.group(3);
-        }
-    }
+    public String getMethod() { return requestLine.get("Method"); }
+    public void setMethod(String method) { this.requestLine.put("Method", method); }
 
-    private void processRequestHeaders(BufferedReader reader) throws IOException {
-        var line = "";
-        final var pattern = Pattern.compile("^(.*?):\\S*(.*)$");
-        for (line = reader.readLine(); line != null && !line.isEmpty(); line = reader.readLine()) {
-            final var matcher = pattern.matcher(line);
-            if (matcher.find()) {
-                this.headers.put(matcher.group(1), matcher.group(2).strip());
-            }
-        }
-    }
+    public String getUri() { return requestLine.get("Path"); }
+    public void setUri(String uri) { this.requestLine.put("Path", uri); }
 
-    public String getMethod() { return method; }
-    public void setMethod(String method) { this.method = method; }
-
-    public String getUri() { return uri; }
-    public void setUri(String uri) { this.uri = uri; }
-
-    public String getVersion() { return version; }
-    public void setVersion(String version) { this.version = version; }
+    public String getVersion() { return requestLine.get("Version"); }
+    public void setVersion(String version) { this.requestLine.put("Version", version); }
 
     public String getHeader(String key) { return headers.get(key); }
     public void setHeader(String key, String value) { headers.put(key, value); }
@@ -73,5 +49,4 @@ public class HttpRequest {
 
     public Object getBody() { return body; }
     public void setBody(Object body) { this.body = body; }
-
 }
