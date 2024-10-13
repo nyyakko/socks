@@ -1,4 +1,4 @@
-package dev.enche.web.enums;
+package dev.enche.web.core.enums;
 
 public enum HttpMethod {
     GET,

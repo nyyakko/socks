@@ -3,8 +3,9 @@ package dev.enche.web;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import dev.enche.application.utils.Utils;
-import dev.enche.web.enums.HttpMethod;
+import dev.enche.web.core.HttpRequest;
+import dev.enche.web.core.enums.HttpMethod;
+import dev.enche.web.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,17 +73,6 @@ public class HttpRouter {
         }
     }
 
-    private Map<String, String> parsePathParams(HttpRequest request, String[] pattern) {
-        Map<String, String> pathParams = new HashMap<>();
-        final var uri = request.getUri().split("/");
-        for (var index = 0; index != pattern.length; index += 1) {
-            if (pattern[index].startsWith("{") && pattern[index].endsWith("}")) {
-                pathParams.put(pattern[index].substring(1, pattern[index].length() - 1), uri[index]);
-            }
-        }
-        return pathParams;
-    }
-
     private Optional<String> findHandlerKey(HttpRequest request) {
         return
             routers
@@ -122,7 +111,7 @@ public class HttpRouter {
                 final var router = routers.get(routerKey);
                 final var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
                 if (routerKey.contains("{") && routerKey.contains("}")) {
-                    request.setPathParams(parsePathParams(request, router.uri().split("/")));
+                    request.setPathParams(Utils.parsePathParams(request.getUri().split("/"), router.uri().split("/")));
                 }
                 try {
                     request.setBody(mapper.readValue(reader.readLine(), router.type()));
@@ -147,7 +136,7 @@ public class HttpRouter {
             .map(routerKey -> {
                 final var router = routers.get(routerKey);
                 if (routerKey.contains("{") && routerKey.contains("}")) {
-                    request.setPathParams(parsePathParams(request, router.uri().split("/")));
+                    request.setPathParams(Utils.parsePathParams(request.getUri().split("/"), router.uri().split("/")));
                 }
                 try {
                     final var result = router.handler().apply(request);
@@ -183,7 +172,7 @@ public class HttpRouter {
             .map(routerKey -> {
                 final var router = routers.get(routerKey);
                 if (routerKey.contains("{") && routerKey.contains("}")) {
-                    request.setPathParams(parsePathParams(request, router.uri().split("/")));
+                    request.setPathParams(Utils.parsePathParams(request.getUri().split("/"), router.uri().split("/")));
                 }
                 router.handler().apply(request);
                 return routerKey;

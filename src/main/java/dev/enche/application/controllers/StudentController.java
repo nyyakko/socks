@@ -2,7 +2,7 @@ package dev.enche.application.controllers;
 
 import dev.enche.application.entities.Student;
 import dev.enche.application.repositories.StudentRepository;
-import dev.enche.web.HttpRequest;
+import dev.enche.web.core.HttpRequest;
 
 import java.util.List;
 import java.util.UUID;

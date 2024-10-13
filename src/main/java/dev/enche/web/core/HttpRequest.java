@@ -1,4 +1,4 @@
-package dev.enche.web;
+package dev.enche.web.core;
 
 import dev.enche.web.utils.Utils;
 

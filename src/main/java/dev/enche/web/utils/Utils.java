@@ -1,5 +1,10 @@
 package dev.enche.web.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,4 +37,21 @@ public class Utils {
         return headers;
     }
 
+    public static Map<String, String> parsePathParams(String[] uri, String[] pattern) {
+        Map<String, String> pathParams = new HashMap<>();
+        for (var index = 0; index != pattern.length; index += 1) {
+            if (pattern[index].startsWith("{") && pattern[index].endsWith("}")) {
+                pathParams.put(pattern[index].substring(1, pattern[index].length() - 1), uri[index]);
+            }
+        }
+        return pathParams;
+    }
+
+    public static String objectAsJson(Object object) throws JsonProcessingException {
+        return new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(object);
+    }
+
+    public static String objectAsPrettyJson(Object object) throws JsonProcessingException {
+        return new JSONObject(objectAsJson(object)).toString(4);
+    }
 }
