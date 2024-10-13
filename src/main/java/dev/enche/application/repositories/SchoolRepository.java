@@ -61,11 +61,11 @@ public class SchoolRepository {
         persistence.delete(id);
     }
 
-    public List<Student> listStudents(UUID companyId) {
+    public List<Student> listStudents(UUID schoolId) {
         return
             studentSchoolPersistence
                 .select(ctx -> ctx
-                    .whereThen(id -> id.equals(companyId), StudentToSchool::getSchoolId)
+                    .whereThen(id -> id.equals(schoolId), StudentToSchool::getSchoolId)
                 )
                 .getAll()
                 .stream()
@@ -81,13 +81,13 @@ public class SchoolRepository {
             ;
     }
 
-    public Optional<Student> findStudent(UUID companyId, UUID workerId) {
+    public Optional<Student> findStudent(UUID schoolId, UUID studentId) {
         return
             studentSchoolPersistence
                 .select(ctx -> ctx
                     .where(query -> query
-                        .is(id -> id.equals(companyId), StudentToSchool::getSchoolId)
-                        .is(id -> id.equals(workerId), StudentToSchool::getStudentId)
+                        .is(id -> id.equals(schoolId), StudentToSchool::getSchoolId)
+                        .is(id -> id.equals(studentId), StudentToSchool::getStudentId)
                     )
                 )
                 .getSingle()
@@ -102,16 +102,16 @@ public class SchoolRepository {
             ;
     }
 
-    public void saveStudent(UUID companyId, UUID workerId) {
-        studentSchoolPersistence.insert(new StudentToSchool(companyId, workerId));
+    public void saveStudent(UUID schoolId, UUID studentId) {
+        studentSchoolPersistence.insert(new StudentToSchool(schoolId, studentId));
     }
 
-    public void deleteStudent(UUID companyId, UUID workerId) {
+    public void deleteStudent(UUID schoolId, UUID studentId) {
         studentSchoolPersistence
             .select(ctx -> ctx
                 .where(query -> query
-                    .is(id -> id.equals(companyId), StudentToSchool::getSchoolId)
-                    .is(id -> id.equals(workerId), StudentToSchool::getStudentId)
+                    .is(id -> id.equals(schoolId), StudentToSchool::getSchoolId)
+                    .is(id -> id.equals(studentId), StudentToSchool::getStudentId)
                 )
             )
             .getSingle()
